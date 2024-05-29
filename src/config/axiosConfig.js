@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an instance of axios with a custom config
 const instance = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: 'http://34.227.92.112:8000/api',
   // You can add more custom config here if needed
 });
 
