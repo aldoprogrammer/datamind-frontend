@@ -2,46 +2,47 @@ import { faStar, faTrash } from '@fortawesome/free-solid-svg-icons'; // Importin
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Avatar, Button, CardBody, CardFooter, Chip, IconButton, Tooltip, Typography } from '@material-tailwind/react';
 import React, { useEffect, useState } from 'react'
-import AddProduct from '../../../components/modal/AddProduct';
 import AIProductOptimization from '../../../components/modal/AIProductOptimization';
 import axios from "../../../config/axiosConfig"; // Import the custom Axios instance
+import AddProduct from '../../../components/modal/AddProduct';
+import AddCategory from '../../../components/modal/AddCategory';
 
 
 const DataTabsCatalog = () => {
     // State variables to manage the modal's visibility
     const [isOpen, setIsOpen] = useState(false);
+    const [productModalOpen, setProductModalOpen] = useState(false); // Add state for AddProduct modal
     const [aiModalOpen, setAiModalOpen] = useState(false); // Add state for AIProductOptimization moda
     const [products, setProducts] = useState([]);
+    const [categoryModalOpen, setCategoryModalOpen] = useState(false); // Add state for AddCategory modal
 
 
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const accessToken = JSON.parse(sessionStorage.getItem('loginResponse'))?.token?.access;
-                if (!accessToken) {
-                    throw new Error('Access token not found');
-                }
-    
-                const response = await axios.get('/product/get', {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                });
-    
-                if (response.status === 200) {
-                    const data = response.data;
-                    setProducts(data);
-                    console.log("Fetched Products:", data);
-                } else {
-                    console.error('Failed to fetch products');
-                }
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
-        };
         fetchProducts();
-    }, []);
-    
+    }, [productModalOpen]);
+
+    const fetchProducts = async () => {
+        try {
+            const accessToken = JSON.parse(sessionStorage.getItem('loginResponse'))?.token?.access;
+            if (!accessToken) {
+                throw new Error('Access token not found');
+            }
+
+            const response = await axios.get('/product/get', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+
+            if (response.status === 200) {
+                setProducts(response.data);
+            } else {
+                console.error('Failed to fetch products');
+            }
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
+    };
 
     // Function to handle opening the AIProductOptimization modal
     const handleAiModalOpen = () => {
@@ -51,6 +52,14 @@ const DataTabsCatalog = () => {
     // Function to handle closing the AIProductOptimization modal
     const handleAiModalClose = () => {
         setAiModalOpen(false);
+    };
+
+    const handleProductModalOpen = () => {
+        setProductModalOpen(true);
+    };
+
+    const handleProductModalClose = () => {
+        setProductModalOpen(false);
     };
 
     const TABLE_HEAD = ["Title", "Price", "Description", "Discount", "Final Price", "Quantity", "Magic", "Delete"];
@@ -112,13 +121,30 @@ const DataTabsCatalog = () => {
     const handleClose = () => {
         setIsOpen(false);
     };
+
+    // Function to handle opening the AddCategory modal
+    const handleCategoryModalOpen = () => {
+        setCategoryModalOpen(true);
+    };
+
+    // Function to handle closing the AddCategory modal
+    const handleCategoryModalClose = () => {
+        setCategoryModalOpen(false);
+    };
     return (
         <div>
-            <div className="flex justify-start my-2 mx-4">
+            <Typography className="text-blue-500 mx-4">
+                            You Have to Create Category First to Create Product
+                            </Typography>
+            <div className="flex justify-start my-2 mx-4 gap-4">
                 <Button color="indigo" ripple="light" onClick={handleOpen}>
                     Add Product
                 </Button>
+                <Button color="indigo" ripple="light" onClick={handleCategoryModalOpen}>
+                    Add Category
+                </Button>
             </div>
+            <AddCategory isOpen={categoryModalOpen} handleClose={handleCategoryModalClose} /> {/* Render AddCategory modal */}
             <AddProduct isOpen={isOpen} handleClose={handleClose} />
             <AIProductOptimization isOpen={aiModalOpen} handleClose={handleAiModalClose} /> {/* Render AIProductOptimization modal */}
 

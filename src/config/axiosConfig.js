@@ -1,8 +1,12 @@
 import axios from 'axios';
 
-// Create an instance of axios with a custom config
+// Dynamically set the base URL with the correct protocol
+const protocol = window.location.protocol;
+const baseUrl = `${protocol}//34.227.92.112:8000/api`;
+
+// Create an instance of axios with the dynamic base URL
 const instance = axios.create({
-  baseURL: 'http://34.227.92.112:8000/api',
+  baseURL: baseUrl,
   // You can add more custom config here if needed
 });
 

@@ -20,10 +20,8 @@ function NavList() {
 
   const handleLogout = async () => {
     try {
-      const refreshToken = sessionStorage.getItem('refreshToken');
-      await axios.post("/logout", { refresh: refreshToken });
       showAldoAlert('You successfully logged out!', 'success');
-      sessionStorage.removeItem('refreshToken'); // Clear refresh token from session storage
+      sessionStorage.removeItem('loginResponse'); // Clear refresh token from session storage
       navigate('/'); // Redirect to the login page after logout
     } catch (error) {
       console.error("Logout failed:", error);

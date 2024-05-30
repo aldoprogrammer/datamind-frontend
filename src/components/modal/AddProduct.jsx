@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from "../../config/axiosConfig"; // Import the custom Axios instance
 
-import { Dialog, DialogBody, DialogFooter, DialogHeader, Input, Typography, Button, CardHeader, Card } from '@material-tailwind/react';
+import { Dialog, DialogBody, DialogFooter, DialogHeader, Input, Typography, Button, CardHeader, Card, Select, Option } from '@material-tailwind/react';
 import { useAldoAlert } from 'aldo-alert';
 
 const AddProduct = ({ isOpen, handleClose }) => {
@@ -12,7 +12,37 @@ const AddProduct = ({ isOpen, handleClose }) => {
     const [discount, setDiscount] = useState('');
     const [quantity, setQuantity] = useState('');
     const [imageUrl, setImageUrl] = useState('');
+    const [category, setCategory] = useState(''); // State variable for selected category
+    const [categories, setCategories] = useState([]); // State variable for list of categories
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const accessToken = JSON.parse(sessionStorage.getItem('loginResponse'))?.token?.access;
+                if (!accessToken) {
+                    throw new Error('Access token not found');
+                }
+    
+                const response = await axios.get('/category/get', {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                });
+    
+                if (response.status === 200) {
+                    setCategories(response.data.results); // Update to setCategories(response.data.results)
+                } else {
+                    console.error('Failed to fetch categories');
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+    
+        fetchCategories();
+    }, []);
+    
 
     const handleSubmit = async () => {
         try {
@@ -20,7 +50,7 @@ const AddProduct = ({ isOpen, handleClose }) => {
             if (!accessToken) {
                 throw new Error('Access token not found');
             }
-    
+
             const productData = {
                 products: [
                     { 
@@ -33,7 +63,7 @@ const AddProduct = ({ isOpen, handleClose }) => {
                         features: "",
                         description: description,
                         catalogue: "",
-                        category_id: 1
+                        category_id: 1, // Use selected category ID
                     }
                 ]
             };
@@ -43,12 +73,13 @@ const AddProduct = ({ isOpen, handleClose }) => {
                     Authorization: `Bearer ${accessToken}`
                 }
             });
-    
+
             console.log('Response from backend:', response);
-    
+
             if (response.status === 200) {
                 console.log('Product created successfully:', response.data.products);
                 showAldoAlert('You successfully created product!', 'success');
+                window.location.reload();
                 handleClose();
             } else {
                 console.error('Failed to create product. Response status:', response.status);
@@ -60,9 +91,6 @@ const AddProduct = ({ isOpen, handleClose }) => {
             setError(error.message);
         }
     };
-    
-    
-    
 
     return (
         <div>
@@ -72,6 +100,9 @@ const AddProduct = ({ isOpen, handleClose }) => {
                         <Typography className="mb-1" variant="h4">
                             Generate Product
                         </Typography>
+                        <Typography className="text-blue-500">
+                            You have to Create Category First to Create Product
+                            </Typography>
                     </DialogHeader>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -134,6 +165,23 @@ const AddProduct = ({ isOpen, handleClose }) => {
                                 placeholder="Enter product description"
                             />
                         </div>
+                        {/* <div className="mt-4">
+                            <Typography className="mb-1" variant="label">
+                                Product Category
+                            </Typography>
+                            <Select 
+    value={category !== null ? category.toString() : ''} 
+    onChange={(value) => setCategory(value !== '' ? parseInt(value) : '')}
+>
+    <Option value="">Select Category</Option>
+    {categories.map((cat) => (
+        <Option key={cat.id} value={cat.id.toString()}>{cat.name}</Option>
+    ))}
+</Select>
+
+
+
+                        </div> */}
                         <div className="mt-4">
                             <Typography className="mb-1" variant="label">
                                 Price
